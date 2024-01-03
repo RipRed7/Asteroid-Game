@@ -34,7 +34,7 @@
 		const TEXT_SIZE = 40; // text font height in pixels
 		const GAME_LIVES = 3 // starting number of lives
 		const SAVE_KEY_SCORE = "highscore"; //save key for local storage for high score
-		const SOUND_ON = false; //
+		const SOUND_ON = true; //
 
 		/** @type {HTMLCanvasElement} */
 		var canv = document.getElementById("gameCanvas");
@@ -43,15 +43,15 @@
 		//set up sounds effects
 		var fxExplode = new Sound("sounds/explode.m4a");
 		var fxHit = new Sound("sounds/hit.m4a", 5);
-		var fxLaser = new Sound("sounds/laser.m4a", 5, 0.3);
-		var fxThrust = new Sound("sounds/thrust.m4a");
-
-		//set up the music
-		var music = new Music("sunds/music-low", "sounds/music-high");
+		var fxLaser = new Sound("sounds/laser.m4a", 5, 0.1);
+		var fxThrust = new Sound("sounds/thrust.m4a", 1, 0.5);
 
 		//set up the game parameters
 		var level, roids, ship, text, textAlpha, lives, score, highScore;
 		newGame();
+
+		//background music
+		var audio = new Audio('sounds/30.mp3');
 
 		//set up event handlers
 		document.addEventListener("keydown", keyDown);
@@ -59,6 +59,7 @@
 
 		//Set game loop
 		setInterval(update, 1000 /  FPS);
+
 
 		function createAsteroidBelt() {
 			roids = [];
@@ -188,6 +189,12 @@
 				case 39: /// right arrow (stop rotating right)
 					ship.rot = 0
 					break;
+
+				case 80: // P (play music)
+					audio.loop = true;
+					audio.play();
+
+
 			}
 		}
 
@@ -232,6 +239,7 @@
 			}
 
 			newLevel();
+
 		}
 
 		function newLevel(){
@@ -272,39 +280,13 @@
 					explodeTime: 0
 				});
 
-				fxLaser.play()
+				fxLaser.play();
 			}
 			//prevent further shooting
 			ship.canShoot = false;
 		}
 
-		function Music(srcLow, srcHigh) {
-			this.soundLow = new Audio(srcLow);
-			this.soundHigh = new Audio(srcHigh);
-			this.low = true;
-			this.tempo = 1.0;
-			this.beatTime = 0;
-
-			this.play = function() {
-				if (this.low) {
-					this.soundLow.play();
-				} else {
-					this.soundHigh.play();
-				}
-				this.low = !this.low;
-			}
-
-			this.tick = function() {
-				if (this.beatTime == 0) {
-					this.play();
-					this.beatTime = Math.ceil(this.tempo * FPS);
-				} else {
-					this.beatTime--;
-				}
-			}
-		}
-
-		function Sound(src, maxStreams = 1, vol = 1.0) {
+		function Sound(src, maxStreams = 1, vol = .3) {
 			this.streamNum = 0;
 			this.streams = [];
 			for (var i = 0; i < maxStreams; i++) {
@@ -319,17 +301,14 @@
 				}
 			}
 			this.stop = function() {
-				this.stream[this.streamNum].pause();
-				this.stream[this.streamNum].currentTime = 0;
+				this.streams[this.streamNum].pause();
+				this.streams[this.streamNum].currentTime = 0;
 			}
 		}
 
 		function update(){
 			var blinkOn = ship.blinkNum % 2 == 0;
 			var exploding = ship.explodeTime > 0;
-
-			// tick the music
-			music.tick();
 
 			//draw space
 			ctx.fillStyle = "black";
@@ -657,5 +636,8 @@
 			}
 		}
 	</script>
+	<h1>Press "P" to start background music </h1>
+	<br>
+	<h3>Created by Anthony Harris</h3>
 </body>
 </html>
